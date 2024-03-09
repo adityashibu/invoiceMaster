@@ -58,7 +58,7 @@ def generate_invoices():
     template_ws.add_image(logo_img, "B1")
     
     # Progress bar
-    progress = ttk.Progressbar(root, orient="horizontal", length=200, mode="determinate")
+    progress = ttk.Progressbar(root, orient="horizontal", length=400, mode="determinate")
     progress.pack(pady=10)
 
     for row_index, row in enumerate(data_ws.iter_rows(min_row=1, max_col=4, values_only=True), start=1):
