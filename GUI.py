@@ -1,10 +1,9 @@
-import os
-
 import tkinter as tk
+import os
 from tkinter import filedialog
-
-from spire.xls import Workbook
-from spire.common import FileFormat
+from openpyxl import load_workbook
+from openpyxl.styles import Alignment
+from openpyxl.drawing.image import Image
 
 # Global variable to keep track of the invoice number
 invoice_number = 1
@@ -37,43 +36,44 @@ def generate_invoices():
     os.makedirs(pdf_folder, exist_ok=True)
 
     # Load template
-    workbook = Workbook()
-    workbook.load_from_file(template_file)
-    worksheet = workbook.active_sheet
-    
-    # Load data
-    data_workbook = Workbook()
-    data_workbook.load_from_file(data_file)
-    data_worksheet = data_workbook.active_sheet
+    template_wb = load_workbook(template_file)
+    template_ws = template_wb.active
 
-    for row_index, row in enumerate(data_worksheet.rows, start=1):
+    # Load data
+    data_wb = load_workbook(data_file)
+    data_ws = data_wb.active
+    
+    # Load image
+    logo_img = Image("./logo.png")
+    logo_img.width = 270  # specify desired width
+    logo_img.height = 70  # specify desired height
+
+    # Add image to cell B1
+    template_ws.add_image(logo_img, "B1")
+
+    for row_index, row in enumerate(data_ws.iter_rows(min_row=1, max_col=4, values_only=True), start=1):
         # Update cell D9 with text from column B
-        worksheet.range["D9"].text = row[1].value
+        template_ws['D9'] = row[1]
 
         # Update cell E2 with text from column A
-        worksheet.range["E2"].text = row[0].value
-        worksheet.range["E3"].text = row[0].value
+        template_ws['E2'] = row[0]
+        template_ws['E3'] = row[0]
         
         # Update cell B16 with text from column C
-        worksheet.range["B16"].text = row[2].value
+        template_ws['B16'] = row[2]
 
         # Update cell C16 with text from column D
-        worksheet.range["E16"].text = row[3].value
+        template_ws['E16'] = row[3]
 
         # Update invoice number at E1
-        worksheet.range["E1"].text = str(invoice_number)
+        template_ws['E1'] = invoice_number
 
         # Increment invoice number
         invoice_number += 1
 
-        # Save the modified template to the 'sheets' folder
-        invoice_filename = f"Invoice_{invoice_number}.xlsx"
-        workbook.save_to_file(os.path.join(sheets_folder, invoice_filename))
-
-        # Convert Excel to PDF
-        pdf_filename = f"Invoice_{invoice_number}.pdf"
-        pdf_path = os.path.join(pdf_folder, pdf_filename)
-        workbook.save_to_pdf(pdf_path, FileFormat.PDF)
+        # Save the modified template to the selected folder
+        invoice_filename = f"{save_folder}/Invoice_{invoice_number}.xlsx"
+        template_wb.save(invoice_filename)
 
     print("Invoices generated successfully!")
 
