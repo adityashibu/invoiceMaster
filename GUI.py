@@ -2,7 +2,6 @@ import tkinter as tk
 import os
 from tkinter import filedialog
 from openpyxl import load_workbook
-from openpyxl.styles import Alignment
 from openpyxl.drawing.image import Image
 
 # Global variable to keep track of the invoice number
